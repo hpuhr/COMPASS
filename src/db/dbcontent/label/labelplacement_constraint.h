@@ -26,6 +26,14 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <unordered_set>
+#include <cstdint>
+#include <iterator>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
 #include <QRectF>
 #include <QLineF>
@@ -739,6 +747,91 @@ namespace constraint
     };
 
     /**
+     * Spatial index of boxes for neighbourhood queries (bulk loaded r-tree), replaces tests of all pairs.
+     * - a query returns the boxes intersecting the query box including touching ones, a superset of the boxes
+     *   overlapping it (exact together with the caller's overlap test)
+     * - results in ascending order => same order as a loop over all boxes (the placement depends on the order)
+     */
+    class BoxIndex
+    {
+    public:
+        /**
+         * use_tree: r-tree, otherwise a test of all boxes per query (same results, for comparisons).
+         */
+        explicit BoxIndex(bool use_tree = true) : use_tree_(use_tree) {}
+
+        /**
+         * Builds the index from the boxes, boxes flagged in skip (optional) are left out.
+         */
+        void build(const std::vector<QRectF>& boxes,
+                   const std::vector<char>* skip = nullptr)
+        {
+            std::vector<Value> values;
+            values.reserve(boxes.size());
+
+            for (size_t i = 0; i < boxes.size(); ++i)
+            {
+                if (skip && (*skip)[ i ])
+                    continue;
+
+                values.emplace_back(toBox(boxes[ i ]), (int)i);
+            }
+
+            if (use_tree_)
+                tree_ = Tree(values.begin(), values.end()); // packing algorithm
+            else
+                values_ = std::move(values);
+        }
+
+        /**
+         * Indices of the boxes intersecting or touching r, ascending if sorted (otherwise in tree order; always
+         * ascending without the tree).
+         */
+        void query(const QRectF& r,
+                   std::vector<int>& result,
+                   bool sorted = true) const
+        {
+            result.clear();
+
+            if (!use_tree_)
+            {
+                const Box q = toBox(r);
+                for (const auto& v : values_)
+                    if (boost::geometry::intersects(v.first, q))
+                        result.push_back(v.second);
+                return;
+            }
+
+            hits_.clear();
+            tree_.query(boost::geometry::index::intersects(toBox(r)), std::back_inserter(hits_));
+
+            result.reserve(hits_.size());
+            for (const auto& hit : hits_)
+                result.push_back(hit.second);
+
+            if (sorted)
+                std::sort(result.begin(), result.end());
+        }
+
+    private:
+        typedef boost::geometry::model::point<double, 2, boost::geometry::cs::cartesian> Point;
+        typedef boost::geometry::model::box<Point>                                         Box;
+        typedef std::pair<Box, int>                                                        Value;
+        typedef boost::geometry::index::rtree<Value, boost::geometry::index::quadratic<16>> Tree;
+
+        static Box toBox(const QRectF& r)
+        {
+            return Box(Point(r.left(), r.top()), Point(r.right(), r.bottom()));
+        }
+
+        bool use_tree_ = true;
+
+        Tree                       tree_;
+        std::vector<Value>         values_; // boxes without the tree
+        mutable std::vector<Value> hits_;   // query buffer
+    };
+
+    /**
      * Needed separation per direction for two boxes (x, y = top left), gaps included.
      */
     inline void separationCosts(double xi, double yi, double wi, double hi,
@@ -921,24 +1014,28 @@ namespace constraint
                 reach[ i ] |= cands[ i * nc + k ];
         }
 
-        //neighbours which can interact
+        //neighbours which can interact (ascending)
+        BoxIndex reach_index(settings.cs_spatial_index), obstacle_index(settings.cs_spatial_index);
+        reach_index.build(reach, excluded);
+        obstacle_index.build(obstacles);
+
         std::vector<std::vector<int>> neighbours(n), near_obstacles(n);
+        std::vector<int>              near;
+
         for (size_t i = 0; i < n; ++i)
         {
             if (isExcluded(i))
                 continue;
 
-            for (size_t j = i + 1; j < n; ++j)
-            {
-                if (!isExcluded(j) && reach[ i ].intersects(reach[ j ]))
-                {
-                    neighbours[ i ].push_back((int)j);
-                    neighbours[ j ].push_back((int)i);
-                }
-            }
-            for (size_t o = 0; o < obstacles.size(); ++o)
+            reach_index.query(reach[ i ], near);
+            for (int j : near)
+                if ((size_t)j != i && reach[ i ].intersects(reach[ j ]))
+                    neighbours[ i ].push_back(j);
+
+            obstacle_index.query(reach[ i ], near);
+            for (int o : near)
                 if (reach[ i ].intersects(obstacles[ o ]))
-                    near_obstacles[ i ].push_back((int)o);
+                    near_obstacles[ i ].push_back(o);
         }
 
         const bool   use_roi = settings.cs_keep_in_roi && !settings.roi.isEmpty();
@@ -1028,16 +1125,22 @@ namespace constraint
 
     /**
      * Density per label of its group: groups are labels with overlapping home boxes (gaps included, transitively),
-     * the density is their label area (gaps included) relative to the area of the region of their candidate
-     * positions (bounding box of the boxes around each anchor at the anchor distance of its home in all directions).
-     * A label without overlaps forms a group of its own.
+     * the density is their label area (gaps included) relative to the area the group can use: the union of the
+     * regions of their candidate positions (box around each anchor at the anchor distance of its home in all
+     * directions), clipped to clip if given (e.g. the region of interest). The union is measured on a raster (cells
+     * counted by their centers, cell size half the mean label height). A label without overlaps forms a group of its
+     * own. spatial_index: r-tree for the overlaps, otherwise all pairs (same result).
      */
     inline std::vector<double> groupDensities(const std::vector<Label>& labels,
                                               const std::vector<double>& hx,
                                               const std::vector<double>& hy,
                                               double gap_x,
-                                              double gap_y)
+                                              double gap_y,
+                                              const QRectF& clip = QRectF(),
+                                              bool spatial_index = true)
     {
+        const size_t MaxRasterCells = 1 << 20;
+
         const size_t n = labels.size();
 
         std::vector<int> root(n);
@@ -1050,44 +1153,281 @@ namespace constraint
             return a;
         };
 
+        std::vector<QRectF> homes(n);
+        for (size_t i = 0; i < n; ++i)
+            homes[ i ] = QRectF(hx[ i ], hy[ i ], labels[ i ].w, labels[ i ].h);
+
+        BoxIndex index(spatial_index);
+        index.build(homes);
+
+        std::vector<int> near;
+
         for (size_t i = 0; i < n; ++i)
         {
-            for (size_t j = i + 1; j < n; ++j)
+            const auto& li = labels[ i ];
+
+            index.query(homes[ i ].adjusted(-gap_x, -gap_y, gap_x, gap_y), near, false); // groups independent of the order
+
+            for (int j : near)
             {
-                const auto& li = labels[ i ];
                 const auto& lj = labels[ j ];
 
-                if (hx[ i ] < hx[ j ] + lj.w + gap_x && hx[ j ] < hx[ i ] + li.w + gap_x &&
+                if ((size_t)j > i &&
+                    hx[ i ] < hx[ j ] + lj.w + gap_x && hx[ j ] < hx[ i ] + li.w + gap_x &&
                     hy[ i ] < hy[ j ] + lj.h + gap_y && hy[ j ] < hy[ i ] + li.h + gap_y)
-                    root[ find((int)i) ] = find((int)j);
+                    root[ find((int)i) ] = find(j);
             }
         }
 
+        //label area per group, regions of the candidate positions
+        std::vector<int>    group(n);
         std::vector<double> area(n, 0.0);
-        std::vector<QRectF> region(n);
+        std::vector<QRectF> reach(n);
+
+        QRectF bounds;
+        double sum_h = 0.0;
 
         for (size_t i = 0; i < n; ++i)
         {
             const auto&  l    = labels[ i ];
             const double dist = pointBoxDistance(l.x_anchor, l.y_anchor, QRectF(hx[ i ], hy[ i ], l.w, l.h));
-            const QRectF reach(l.x_anchor - dist - l.w, l.y_anchor - dist - l.h, 2 * (dist + l.w), 2 * (dist + l.h));
 
-            const int r = find((int)i);
+            reach[ i ] = QRectF(l.x_anchor - dist - l.w, l.y_anchor - dist - l.h, 2 * (dist + l.w), 2 * (dist + l.h));
+            if (!clip.isEmpty())
+                reach[ i ] = reach[ i ].intersected(clip);
 
-            area  [ r ] += (l.w + gap_x) * (l.h + gap_y);
-            region[ r ]  = region[ r ].isNull() ? reach : region[ r ] | reach;
+            if (!reach[ i ].isEmpty())
+                bounds = bounds.isNull() ? reach[ i ] : bounds.united(reach[ i ]);
+
+            group[ i ] = find((int)i);
+
+            area[ group[ i ] ] += (l.w + gap_x) * (l.h + gap_y);
+            sum_h              += l.h;
+        }
+
+        if (bounds.isEmpty())
+            return std::vector<double>(n, 0.0);
+
+        //raster over all regions, enlarged cells if too many
+        double cell = std::max(0.5 * sum_h / n, 1.0);
+
+        const double num_cells = (bounds.width() / cell + 1) * (bounds.height() / cell + 1);
+        if (num_cells > MaxRasterCells)
+            cell *= std::sqrt(num_cells / MaxRasterCells);
+
+        const int nx = (int)std::ceil(bounds.width()  / cell);
+        const int ny = (int)std::ceil(bounds.height() / cell);
+
+        //covered cells per group: groups one after another, a cell is counted once per group (stamped)
+        std::vector<int> order(n);
+        std::iota(order.begin(), order.end(), 0);
+        std::stable_sort(order.begin(), order.end(), [ & ] (int a, int b) { return group[ a ] < group[ b ]; });
+
+        std::vector<int>    stamp((size_t)nx * ny, -1);
+        std::vector<size_t> covered(n, 0);
+
+        for (int i : order)
+        {
+            const QRectF& r = reach[ i ];
+            if (r.isEmpty())
+                continue;
+
+            //cells with their center inside the region
+            const int ix0 = std::max((int)std::ceil ((r.left()   - bounds.left()) / cell - 0.5), 0);
+            const int ix1 = std::min((int)std::floor((r.right()  - bounds.left()) / cell - 0.5), nx - 1);
+            const int iy0 = std::max((int)std::ceil ((r.top()    - bounds.top())  / cell - 0.5), 0);
+            const int iy1 = std::min((int)std::floor((r.bottom() - bounds.top())  / cell - 0.5), ny - 1);
+
+            for (int iy = iy0; iy <= iy1; ++iy)
+            {
+                for (int ix = ix0; ix <= ix1; ++ix)
+                {
+                    auto& s = stamp[ (size_t)iy * nx + ix ];
+                    if (s == group[ i ])
+                        continue;
+
+                    s = group[ i ];
+                    ++covered[ group[ i ] ];
+                }
+            }
         }
 
         std::vector<double> density(n, 0.0);
         for (size_t i = 0; i < n; ++i)
         {
-            const int    r = find((int)i);
-            const double a = region[ r ].width() * region[ r ].height();
+            const double a = covered[ group[ i ] ] * cell * cell;
 
-            density[ i ] = a > 0.0 ? area[ r ] / a : 0.0;
+            density[ i ] = a > 0.0 ? area[ group[ i ] ] / a : 0.0;
         }
 
         return density;
+    }
+
+    /**
+     * Summed area table of the area of boxes on a raster: area within any rectangle in O(1).
+     * - cell values = overlap areas of the boxes with the cell (exact), spread evenly within the cell
+     * - the integral of such a raster is bilinear within each cell => interpolated exactly between the cell corners,
+     *   continuous in the rectangle (no jumps at cell borders)
+     * - the raster covers the given bounds, nothing outside counts; enlarged cells if more than MaxCells
+     */
+    class AreaTable
+    {
+    public:
+        static constexpr size_t MaxCells = 1 << 20;
+
+        void build(const std::vector<QRectF>& boxes,
+                   const QRectF& bounds,
+                   double cell)
+        {
+            x0_   = bounds.left();
+            y0_   = bounds.top();
+            cell_ = std::max(cell, 1.0);
+
+            const double num_cells = (bounds.width() / cell_ + 1) * (bounds.height() / cell_ + 1);
+            if (num_cells > MaxCells)
+                cell_ *= std::sqrt(num_cells / MaxCells);
+
+            nx_ = std::max((int)std::ceil(bounds.width()  / cell_), 1);
+            ny_ = std::max((int)std::ceil(bounds.height() / cell_), 1);
+
+            //cell values
+            std::vector<double> cells((size_t)nx_ * ny_, 0.0);
+
+            for (const auto& b : boxes)
+            {
+                const int ix0 = std::max((int)std::floor((b.left()   - x0_) / cell_), 0);
+                const int ix1 = std::min((int)std::floor((b.right()  - x0_) / cell_), nx_ - 1);
+                const int iy0 = std::max((int)std::floor((b.top()    - y0_) / cell_), 0);
+                const int iy1 = std::min((int)std::floor((b.bottom() - y0_) / cell_), ny_ - 1);
+
+                for (int iy = iy0; iy <= iy1; ++iy)
+                {
+                    for (int ix = ix0; ix <= ix1; ++ix)
+                    {
+                        const QRectF c(x0_ + ix * cell_, y0_ + iy * cell_, cell_, cell_);
+                        cells[ (size_t)iy * nx_ + ix ] += overlapArea(b, c);
+                    }
+                }
+            }
+
+            //sums of the cells above and left of each cell corner
+            sums_.assign((size_t)(nx_ + 1) * (ny_ + 1), 0.0);
+
+            for (int iy = 0; iy < ny_; ++iy)
+                for (int ix = 0; ix < nx_; ++ix)
+                    sums_[ corner(ix + 1, iy + 1) ] = cells[ (size_t)iy * nx_ + ix ] + sums_[ corner(ix, iy + 1) ]
+                                                    + sums_[ corner(ix + 1, iy) ] - sums_[ corner(ix, iy) ];
+        }
+
+        /**
+         * Area of the boxes within r.
+         */
+        double area(const QRectF& r) const
+        {
+            if (sums_.empty())
+                return 0.0;
+
+            return integral(r.right(), r.bottom()) - integral(r.left(), r.bottom())
+                 - integral(r.right(), r.top())    + integral(r.left(), r.top());
+        }
+
+    private:
+        size_t corner(int ix, int iy) const { return (size_t)iy * (nx_ + 1) + ix; }
+
+        //area above and left of (x, y), bilinear between the cell corners
+        double integral(double x, double y) const
+        {
+            const double u = std::min(std::max((x - x0_) / cell_, 0.0), (double)nx_);
+            const double v = std::min(std::max((y - y0_) / cell_, 0.0), (double)ny_);
+
+            const int    ix = std::min((int)u, nx_ - 1);
+            const int    iy = std::min((int)v, ny_ - 1);
+            const double fu = u - ix;
+            const double fv = v - iy;
+
+            return (1 - fu) * (1 - fv) * sums_[ corner(ix,     iy)     ] + fu * (1 - fv) * sums_[ corner(ix + 1, iy)     ]
+                 + (1 - fu) * fv       * sums_[ corner(ix,     iy + 1) ] + fu * fv       * sums_[ corner(ix + 1, iy + 1) ];
+        }
+
+        double x0_   = 0.0;
+        double y0_   = 0.0;
+        double cell_ = 1.0;
+        int    nx_   = 0;
+        int    ny_   = 0;
+
+        std::vector<double> sums_; // (nx + 1) x (ny + 1) cell corners
+    };
+
+    /**
+     * Crowding per label: whether the labels around it can be decluttered close to their anchors. Per scale (windows
+     * around the anchor: the region of the label's candidate positions, i.e. anchor +- (anchor distance of its home +
+     * label size), doubled scales - 1 times, clipped to clip if given), the label area within the window (home boxes
+     * incl. gaps) relative to the window area, divided by the room gained if labels may be pushed out of the window
+     * by up to reach label sizes (sqrt(w * h)): (1 + reach px / r)^2, r = half the side of a square of the window
+     * area. Crowding = max over the scales, in units of a density at large scales: a small dense cluster with room
+     * around it is not crowded, a large area of the same density is.
+     */
+    inline std::vector<double> localCrowding(const std::vector<Label>& labels,
+                                             const std::vector<double>& hx,
+                                             const std::vector<double>& hy,
+                                             double gap_x,
+                                             double gap_y,
+                                             int scales,
+                                             double reach,
+                                             const QRectF& clip = QRectF())
+    {
+        const size_t n = labels.size();
+        if (n == 0)
+            return {};
+
+        //home boxes incl. half the gap on each side => area (w + gap) * (h + gap)
+        std::vector<QRectF> homes(n);
+
+        QRectF bounds;
+        double sum_h = 0.0;
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            homes[ i ] = QRectF(hx[ i ] - gap_x / 2, hy[ i ] - gap_y / 2, labels[ i ].w + gap_x, labels[ i ].h + gap_y);
+            bounds     = i == 0 ? homes[ i ] : bounds.united(homes[ i ]);
+            sum_h     += labels[ i ].h;
+        }
+
+        if (!clip.isEmpty())
+            bounds = clip;
+
+        AreaTable table;
+        table.build(homes, bounds, 0.5 * sum_h / n);
+
+        std::vector<double> crowding(n, 0.0);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            const auto&  l        = labels[ i ];
+            const double dist     = pointBoxDistance(l.x_anchor, l.y_anchor, QRectF(hx[ i ], hy[ i ], l.w, l.h));
+            const double reach_px = reach * std::sqrt(l.w * l.h);
+
+            double rx = dist + l.w;
+            double ry = dist + l.h;
+
+            for (int s = 0; s < scales; ++s, rx *= 2, ry *= 2)
+            {
+                QRectF win(l.x_anchor - rx, l.y_anchor - ry, 2 * rx, 2 * ry);
+                if (!clip.isEmpty())
+                    win = win.intersected(clip);
+
+                const double win_area = win.width() * win.height();
+                if (win_area <= 0.0)
+                    continue;
+
+                const double density = table.area(win) / win_area;
+                const double room    = 1.0 + reach_px / (0.5 * std::sqrt(win_area));
+
+                crowding[ i ] = std::max(crowding[ i ], density / (room * room));
+            }
+        }
+
+        return crowding;
     }
 
     /**
@@ -1099,14 +1439,15 @@ namespace constraint
         bool   rounds_exhausted  = false; // new overlaps were still found in the last round
         bool   solver_converged  = true;  // all axis solves optimal and feasible
         int    unresolvable      = 0;     // overlapping pairs without an acyclic separation direction
-        int    overlaps          = 0;     // overlapping label pairs left (without gap)
+        int    overlaps          = 0;     // overlapping label pairs left (without gap), at least one of them decluttered
         int    side_changes      = 0;     // labels placed on another side of their anchor than before (candidates)
         int    implied           = 0;     // separations implied by others (no constraint needed)
         int    separations       = 0;     // hard separation constraints between labels (both axes)
         int    obstacle_bounds   = 0;     // soft bounds of obstacles (anchors, additional objects)
         bool   time_exhausted    = false; // stopped by the runtime limit (cs_max_time_ms), last complete state returned
         double max_group_density = 0.0;   // highest group density (only computed if cs_max_group_density is set)
-        int    overcrowded       = 0;     // labels of overcrowded groups, not decluttered (at home)
+        double max_local_density = 0.0;   // highest local crowding (only computed if cs_adaptive is set)
+        int    overcrowded       = 0;     // labels of overcrowded groups or crowded areas, not decluttered (at home)
     };
 
     /**
@@ -1117,6 +1458,9 @@ namespace constraint
      * smallest first. When reached, the last complete state is returned: per label and axis the position of the last
      * completed solve of its component (feasible for its constraints, also if stopped while optimizing), or the
      * previous placement if its component was never solved.
+     * Not decluttered (Label::excluded, at home): overcrowded groups (cs_max_group_density) or, adaptive
+     * (cs_adaptive), labels in crowded areas (cs_max_local_density, hysteresis by Label::excluded_last), which are
+     * fixed obstacles for the others.
      * Notice: Returns true unless an error occurred, also if overlaps remain (no feasible direction, too dense
      * for the region of interest, solver limits, runtime limit), see stats.
      */
@@ -1151,13 +1495,40 @@ namespace constraint
             h [ i ] = l.h;
         }
 
-        //overcrowded groups (much more label area than space around their anchors, e.g. local pile-ups) are not
-        //decluttered: left out of the candidate choice and the constraints, the labels stay at home (their anchors
-        //are still obstacles for the others)
+        //overcrowded groups (much more label area than space around their anchors, e.g. local pile-ups or a crowded
+        //screen) are not decluttered: left out of the candidate choice and the constraints, the labels stay at home
+        //(their anchors are still obstacles for the others)
+        //adaptive: per label instead, labels in crowded areas stay at home and are fixed for the others, the rest is
+        //decluttered (hysteresis: a label stays excluded until its area is clearly less crowded)
+        const QRectF clip = settings.cs_keep_in_roi ? settings.roi : QRectF();
+
         std::vector<char> excluded(n, 0);
-        if (settings.cs_max_group_density > 0.0)
+        if (settings.cs_adaptive)
         {
-            const auto density = groupDensities(labels, hx, hy, gap_x, gap_y);
+            const auto density = localCrowding(labels,
+                                               hx,
+                                               hy,
+                                               gap_x,
+                                               gap_y,
+                                               settings.cs_local_scales,
+                                               settings.cs_local_reach,
+                                               clip);
+            for (size_t i = 0; i < n; ++i)
+            {
+                st.max_local_density = std::max(st.max_local_density, density[ i ]);
+
+                const double threshold = labels[ i ].excluded_last ? settings.cs_local_hysteresis * settings.cs_max_local_density
+                                                                   : settings.cs_max_local_density;
+                if (density[ i ] > threshold)
+                {
+                    excluded[ i ] = 1;
+                    ++st.overcrowded;
+                }
+            }
+        }
+        else if (settings.cs_max_group_density > 0.0)
+        {
+            const auto density = groupDensities(labels, hx, hy, gap_x, gap_y, clip, settings.cs_spatial_index);
 
             for (size_t i = 0; i < n; ++i)
             {
@@ -1171,7 +1542,7 @@ namespace constraint
             }
         }
 
-        //fixed obstacles: anchors, then the additional objects
+        //fixed obstacles: anchors, then the additional objects, then the labels left at home (adaptive)
         std::vector<QRectF> obstacles;
         if (settings.cs_avoid_anchors && settings.cs_anchor_radius > 0)
         {
@@ -1186,6 +1557,13 @@ namespace constraint
 
         if (settings.avoid_objects)
             obstacles.insert(obstacles.end(), settings.additional_objects.begin(), settings.additional_objects.end());
+
+        if (settings.cs_adaptive)
+        {
+            for (size_t i = 0; i < n; ++i)
+                if (excluded[ i ])
+                    obstacles.emplace_back(hx[ i ], hy[ i ], w[ i ], h[ i ]);
+        }
 
         const size_t no = obstacles.size();
 
@@ -1239,8 +1617,18 @@ namespace constraint
             }
         }
 
-        std::vector<signed char> pair_dir    (n * n , None);
-        std::vector<signed char> obstacle_dir(n * no, None);
+        //label pairs and label/obstacle pairs with a separation (keys i * n + j with i < j, i * no + o)
+        std::unordered_set<std::uint64_t> separated_pairs, bounded_obstacles;
+
+        auto pairKey     = [ & ] (size_t i, size_t j) { return (std::uint64_t)i * n  + j; };
+        auto obstacleKey = [ & ] (size_t i, size_t o) { return (std::uint64_t)i * no + o; };
+
+        //candidates for overlaps: labels at their current positions, obstacles (fixed)
+        BoxIndex label_index(settings.cs_spatial_index), obstacle_index(settings.cs_spatial_index);
+        obstacle_index.build(obstacles);
+
+        std::vector<QRectF> boxes(n);
+        std::vector<int>    near;
 
         OrderGraph graph_x(n), graph_y(n);
 
@@ -1266,7 +1654,12 @@ namespace constraint
 
             st.rounds = round + 1;
 
-            //label pairs
+            //label pairs (positions are fixed within a round)
+            for (size_t i = 0; i < n; ++i)
+                boxes[ i ] = QRectF(x[ i ], y[ i ], w[ i ], h[ i ]);
+
+            label_index.build(boxes, &excluded);
+
             for (size_t i = 0; i < n && !st.time_exhausted; ++i)
             {
                 if (deadline.expired())
@@ -1278,13 +1671,18 @@ namespace constraint
                 if (excluded[ i ])
                     continue;
 
-                for (size_t j = i + 1; j < n; ++j)
+                label_index.query(boxes[ i ].adjusted(-gap_x, -gap_y, gap_x, gap_y), near);
+
+                for (int jj : near)
                 {
-                    auto& dir = pair_dir[ i * n + j ];
-                    if (dir != None || excluded[ j ])
+                    const size_t j = (size_t)jj;
+                    if (j <= i)
                         continue;
 
                     if (!overlaps(x[ i ], y[ i ], w[ i ], h[ i ], x[ j ], y[ j ], w[ j ], h[ j ]))
+                        continue;
+
+                    if (separated_pairs.count(pairKey(i, j)))
                         continue;
 
                     double cost[ 4 ], prev_cost[ 4 ];
@@ -1332,7 +1730,8 @@ namespace constraint
                             ++st.separations;
                         }
 
-                        dir   = (signed char)d;
+                        separated_pairs.insert(pairKey(i, j));
+
                         added = true;
                         break;
                     }
@@ -1351,15 +1750,17 @@ namespace constraint
                 if (excluded[ i ])
                     continue;
 
-                for (size_t o = 0; o < no; ++o)
-                {
-                    auto& dir = obstacle_dir[ i * no + o ];
-                    if (dir != None)
-                        continue;
+                obstacle_index.query(boxes[ i ].adjusted(-gap_x, -gap_y, gap_x, gap_y), near);
 
-                    const auto& ob = obstacles[ o ];
+                for (int oo : near)
+                {
+                    const size_t o  = (size_t)oo;
+                    const auto&  ob = obstacles[ o ];
 
                     if (!overlaps(x[ i ], y[ i ], w[ i ], h[ i ], ob.left(), ob.top(), ob.width(), ob.height()))
+                        continue;
+
+                    if (!bounded_obstacles.insert(obstacleKey(i, o)).second)
                         continue;
 
                     double cost[ 4 ], prev_cost[ 4 ];
@@ -1385,7 +1786,6 @@ namespace constraint
 
                     ++st.obstacle_bounds;
 
-                    dir   = (signed char)d;
                     added = true;
                 }
             }
@@ -1452,21 +1852,38 @@ namespace constraint
 
         for (size_t i = 0; i < n; ++i)
         {
-            labels[ i ].x = x[ i ];
-            labels[ i ].y = y[ i ];
+            labels[ i ].x        = x[ i ];
+            labels[ i ].y        = y[ i ];
+            labels[ i ].excluded = excluded[ i ] != 0;
         }
 
-        //diagnostics: pairs left overlapping (without gap), pairs without a feasible direction
+        //diagnostics: pairs left overlapping (without gap), pairs without a feasible direction; pairs of two labels
+        //not decluttered are not counted (overlapping on purpose)
+        for (size_t i = 0; i < n; ++i)
+            boxes[ i ] = QRectF(x[ i ], y[ i ], w[ i ], h[ i ]);
+
+        label_index.build(boxes);
+
         for (size_t i = 0; i < n; ++i)
         {
-            for (size_t j = i + 1; j < n; ++j)
+            if (excluded[ i ])
+                continue;
+
+            label_index.query(boxes[ i ], near, false); // counts only
+
+            for (int jj : near)
             {
+                const size_t j = (size_t)jj;
+                if (j == i || (j < i && !excluded[ j ])) // pairs of decluttered labels counted once
+                    continue;
+
                 if (x[ i ] < x[ j ] + w[ j ] && x[ j ] < x[ i ] + w[ i ] &&
                     y[ i ] < y[ j ] + h[ j ] && y[ j ] < y[ i ] + h[ i ])
                 {
                     ++st.overlaps;
 
-                    if (pair_dir[ i * n + j ] == None)
+                    //only pairs of decluttered labels are separated (here i < j)
+                    if (!excluded[ j ] && !separated_pairs.count(pairKey(i, j)))
                         ++st.unresolvable;
                 }
             }

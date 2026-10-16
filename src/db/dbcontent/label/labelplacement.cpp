@@ -55,19 +55,21 @@ void LabelPlacementEngine::addLabel(const std::string& id,
                                     double* y_init,
                                     double* x_ref,
                                     double* y_ref,
-                                    bool has_last)
+                                    bool has_last,
+                                    bool excluded_last)
 {
     Label l;
-    l.id       = id;
-    l.x_anchor = x_anchor;
-    l.y_anchor = y_anchor;
-    l.x        = x_init ? *x_init : x_anchor;
-    l.y        = y_init ? *y_init : y_anchor;
-    l.x_last   = l.x;
-    l.y_last   = l.y;
-    l.w        = w;
-    l.h        = h;
-    l.has_last = has_last;
+    l.id            = id;
+    l.x_anchor      = x_anchor;
+    l.y_anchor      = y_anchor;
+    l.x             = x_init ? *x_init : x_anchor;
+    l.y             = y_init ? *y_init : y_anchor;
+    l.x_last        = l.x;
+    l.y_last        = l.y;
+    l.w             = w;
+    l.h             = h;
+    l.has_last      = has_last;
+    l.excluded_last = excluded_last;
 
     if (x_ref && y_ref)
     {

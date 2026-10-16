@@ -94,6 +94,9 @@ namespace label_placement
         boost::optional<double> y_ref; //a reference y position, which is deemed 'optimal' and MIGHT get enforced by a label algorithm
 
         bool has_last = true; //initial position is a previous placement (false: no history, e.g. a new label)
+
+        bool excluded_last = false; //not decluttered in the previous run (constraint based method, adaptive: hysteresis)
+        bool excluded      = false; //result: not decluttered, stays at home (constraint based method: overcrowded)
     };
 
     enum class Method
@@ -125,7 +128,7 @@ namespace label_placement
     {
         typedef std::vector<QRectF> Objects;
 
-        Method method = Method::ForceBasedSimple; //used label placement approach
+        Method method = Method::ConstraintBased;  //used label placement approach
         QRectF roi;                               //region of interest, MIGHT be enforced by a specific labeling algorithm
 
         //settings for methods 'ForceBasedSimple', 'ForceBasedExtended' and 'ForceBasedRelaxed'
@@ -156,20 +159,21 @@ namespace label_placement
         ForceDirection fbe_force_dir     = ForceDirection::XY;
         StickyPosition fbe_sticky_pos    = StickyPosition::InitPos;
 
-        //settings for method 'ConstraintBased' (target: reference position, previous placement: initial position)
+        //settings for method 'ConstraintBased' (target: reference position, previous placement: initial position;
+        //defaults = settings of the geographic view's label overlay)
         double cs_gap_x         = 2.0;   //min horizontal gap between labels and between labels and obstacles
         double cs_gap_y         = 2.0;   //min vertical gap between labels and between labels and obstacles
-        double cs_balance       = 0.0;   //separation direction by the needed displacement divided by size^cs_balance of the
+        double cs_balance       = 0.5;   //separation direction by the needed displacement divided by size^cs_balance of the
                                          //  pair along the axis (0 = absolute => wide labels stack vertically, 1 = relative)
-        int    cs_candidates    = 1;     //candidate positions around the anchor (at the anchor distance of the reference
+        int    cs_candidates    = 8;     //candidate positions around the anchor (at the anchor distance of the reference
                                          //  position): 1 = reference position only, 4 = diagonal, 8 = also axis-aligned
         double cs_cand_penalty  = 0.0;   //cost of leaving the reference position, fraction of the label area
                                          //  (0 = all directions equal)
         double cs_cand_switch   = 0.5;   //cost of leaving the candidate of the previous placement, fraction of the label area
         int    cs_cand_sweeps   = 10;    //max sweeps of the candidate choice
         bool   cs_avoid_anchors = true;  //anchors are obstacles (squares of 2 * cs_anchor_radius)
-        double cs_anchor_radius = 0.0;   //obstacle radius around anchors (0 = anchors not avoided)
-        bool   cs_keep_in_roi   = false; //keep labels within the region of interest 'roi'
+        double cs_anchor_radius = 10.0;  //obstacle radius around anchors (0 = anchors not avoided)
+        bool   cs_keep_in_roi   = true;  //keep labels within the region of interest 'roi' (if set)
         double cs_keep_factor   = 2.0;   //the previous separation direction of a pair is kept unless it needs more than
         double cs_keep_abs      = 10.0;  //  cs_keep_factor * cheapest + cs_keep_abs separation
         double cs_prev_tolerance= 0.5;   //previous placements count as separated up to this overlap, as fraction of the
@@ -177,12 +181,25 @@ namespace label_placement
         double cs_soft_weight   = 100.0; //cost weight of violating an obstacle or the region of interest (labels: hard)
         double cs_object_weight = 1e4;   //cost weight of violating an additional object (fixed labels => practically hard)
         int    cs_max_rounds    = 20;    //max rounds of constraint generation (new overlaps after solving)
-        double cs_weight_prev   = 0.0;   //weight of the distance from the previous placement relative to the distance
+        double cs_weight_prev   = 1.0;   //weight of the distance from the previous placement relative to the distance
                                          //  from home (0 = off; smoothness between runs, costs locality)
-        double cs_max_time_ms   = 0.0;   //runtime limit in ms (0 = unlimited): when reached, the last complete state is
+        double cs_max_time_ms   = 100.0; //runtime limit in ms (0 = unlimited): when reached, the last complete state is
                                          //  returned (see constraint::placeLabels())
-        double cs_max_group_density = 0.0; //groups of labels with overlapping homes above this density (label area relative
+        double cs_max_group_density = 1.0; //groups of labels with overlapping homes above this density (label area relative
                                            //  to the area around their anchors) are not decluttered (0 = off)
+        bool   cs_adaptive          = true;  //declutter what is possible: labels in crowded areas (local crowding above
+                                             //  cs_max_local_density) stay at home and are fixed obstacles for the
+                                             //  others, replaces cs_max_group_density
+        double cs_max_local_density = 0.5;   //adaptive: max crowding = label area (gaps included) relative to the area
+                                             //  around the label's anchor, incl. the room within cs_local_reach
+        double cs_local_hysteresis  = 0.8;   //adaptive: a label not decluttered in the previous run rejoins below this
+                                             //  fraction of cs_max_local_density
+        int    cs_local_scales      = 4;     //adaptive: windows around the anchor (region of the label's candidate
+                                             //  positions, doubled cs_local_scales - 1 times)
+        double cs_local_reach       = 2.5;   //adaptive: distance labels may be pushed out of a crowded window, in label
+                                             //  sizes (sqrt(w * h))
+        bool   cs_spatial_index     = true;  //neighbours and overlaps via an r-tree, otherwise by testing all pairs
+                                             //  (same result)
 
         bool verbose = false;
 

@@ -102,7 +102,8 @@ public:
                   double* y_init = nullptr,
                   double* x_ref = nullptr,
                   double* y_ref = nullptr,
-                  bool has_last = true);
+                  bool has_last = true,
+                  bool excluded_last = false);
     const Label& getLabel(size_t idx) const;
     const Label* getLabel(const std::string& id) const;
     void removeLabel(size_t idx);
@@ -111,7 +112,7 @@ public:
 
     bool placeLabels();
     bool   timeExhausted() const { return time_exhausted_; }   // last placement stopped by the runtime limit
-    size_t numOvercrowded() const { return num_overcrowded_; } // labels of overcrowded groups in the last placement
+    size_t numOvercrowded() const { return num_overcrowded_; } // labels not decluttered in the last placement (overcrowded)
 
     Settings& settings() { return settings_; }
 

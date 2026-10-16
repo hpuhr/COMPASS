@@ -27,6 +27,29 @@
 
 #include <QLineF>
 
+namespace
+{
+
+/**
+ * Constraint based method without the optional mechanisms (the defaults are the settings of the label overlay):
+ * reference position only, anchors and region of interest not avoided, no smoothing, no runtime limit, no density
+ * checks. Tests of single mechanisms switch on what they need.
+ */
+void minimalConstraintSettings(label_placement::Settings& settings)
+{
+    settings.method               = label_placement::Method::ConstraintBased;
+    settings.cs_balance           = 0.0;
+    settings.cs_candidates        = 1;
+    settings.cs_anchor_radius     = 0.0;
+    settings.cs_keep_in_roi       = false;
+    settings.cs_weight_prev       = 0.0;
+    settings.cs_max_time_ms       = 0.0;
+    settings.cs_max_group_density = 0.0;
+    settings.cs_adaptive          = false;
+}
+
+}
+
 TEST_CASE("LabelPlacementEngine coincident labels", "[labelplacement]")
 {
     LabelPlacementEngine engine;
@@ -78,6 +101,8 @@ TEST_CASE("LabelPlacementEngine fixed objects", "[labelplacement]")
     LabelPlacementEngine engine;
 
     auto& settings = engine.settings();
+    minimalConstraintSettings(settings);
+
     settings.method = method;
     settings.roi    = QRectF(0, 0, 400, 300);
 
@@ -245,7 +270,7 @@ TEST_CASE("LabelPlacementEngine relaxed force method", "[labelplacement]")
 TEST_CASE("LabelPlacementEngine constraint based method", "[labelplacement]")
 {
     LabelPlacementEngine engine;
-    engine.settings().method = label_placement::Method::ConstraintBased;
+    minimalConstraintSettings(engine.settings());
 
     //label with home (reference) and previous placement (initial position), anchor below the home position
     auto add = [ & ] (const std::string& id, double hx, double hy, double px, double py, double w = 40.0, double h = 10.0)
@@ -715,7 +740,8 @@ TEST_CASE("Constraint based placement of an overcrowded cluster", "[labelplaceme
     CAPTURE(weight_prev);
 
     label_placement::Settings settings;
-    settings.method           = label_placement::Method::ConstraintBased;
+    minimalConstraintSettings(settings);
+
     settings.cs_weight_prev   = weight_prev;
     settings.roi              = QRectF(0.0, 0.0, 1599.0, 899.0);
     settings.cs_avoid_anchors = true;
@@ -727,14 +753,14 @@ TEST_CASE("Constraint based placement of an overcrowded cluster", "[labelplaceme
 
     REQUIRE(stats.solver_converged);
     REQUIRE(!stats.rounds_exhausted);
-    REQUIRE(!stats.time_exhausted); // no limit by default
+    REQUIRE(!stats.time_exhausted); // no limit
     REQUIRE(stats.overlaps == 0);
 }
 
 TEST_CASE("Constraint based placement implied separations and runtime limit", "[labelplacement]")
 {
     label_placement::Settings settings;
-    settings.method = label_placement::Method::ConstraintBased;
+    minimalConstraintSettings(settings);
 
     SECTION("a separation implied by others adds no constraint")
     {
@@ -809,6 +835,128 @@ TEST_CASE("Constraint based placement implied separations and runtime limit", "[
     }
 }
 
+TEST_CASE("Constraint based placement box index", "[labelplacement]")
+{
+    //random boxes of different sizes, some touching
+    std::mt19937 rng(11);
+    std::uniform_real_distribution<double> ux(0.0, 800.0), uy(0.0, 600.0), uw(5.0, 120.0), uh(5.0, 40.0);
+
+    std::vector<QRectF> boxes;
+    for (int i = 0; i < 300; ++i)
+        boxes.emplace_back(ux(rng), uy(rng), uw(rng), uh(rng));
+
+    boxes.emplace_back(boxes[ 0 ].right(), boxes[ 0 ].top(), 10.0, 10.0); // touches box 0
+
+    std::vector<char> skip(boxes.size(), 0);
+    for (size_t i = 0; i < boxes.size(); i += 7)
+        skip[ i ] = 1;
+
+    //r-tree and test of all boxes
+    const bool use_tree = GENERATE(true, false);
+
+    SECTION("a query returns all intersecting boxes in ascending order")
+    {
+        label_placement::constraint::BoxIndex index(use_tree);
+        index.build(boxes);
+
+        std::vector<int> near;
+        for (size_t i = 0; i < boxes.size(); ++i)
+        {
+            index.query(boxes[ i ], near);
+
+            REQUIRE(std::is_sorted(near.begin(), near.end()));
+
+            std::vector<int> expected, found;
+            for (size_t j = 0; j < boxes.size(); ++j)
+                if (boxes[ i ].intersects(boxes[ j ]))
+                    expected.push_back((int)j);
+            for (int j : near)
+                if (boxes[ i ].intersects(boxes[ j ]))
+                    found.push_back(j);
+
+            REQUIRE(found == expected);
+        }
+
+        //touching boxes are returned as well (superset)
+        index.query(boxes[ 0 ], near);
+        REQUIRE(std::find(near.begin(), near.end(), (int)boxes.size() - 1) != near.end());
+    }
+
+    SECTION("skipped boxes are left out")
+    {
+        label_placement::constraint::BoxIndex index(use_tree);
+        index.build(boxes, &skip);
+
+        std::vector<int> near;
+        for (size_t i = 0; i < boxes.size(); ++i)
+        {
+            index.query(boxes[ i ], near);
+
+            for (int j : near)
+                REQUIRE(!skip[ j ]);
+        }
+    }
+}
+
+TEST_CASE("Constraint based placement without the spatial index", "[labelplacement]")
+{
+    //spread labels and a dense cluster
+    std::mt19937 rng(3);
+    std::uniform_real_distribution<double> ux(20.0, 1500.0), uy(40.0, 860.0), cx(700.0, 800.0), cy(400.0, 460.0);
+
+    std::vector<label_placement::Label> labels(300);
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        auto& l = labels[ i ];
+
+        const bool cluster = i % 5 == 0;
+
+        l.id       = std::to_string(i);
+        l.w        = 60.0;
+        l.h        = 16.0;
+        l.x_anchor = cluster ? cx(rng) : ux(rng);
+        l.y_anchor = cluster ? cy(rng) : uy(rng);
+        l.x        = l.x_last = l.x_anchor + 14.0;
+        l.y        = l.y_last = l.y_anchor - 30.0;
+        l.x_ref    = l.x;
+        l.y_ref    = l.y;
+    }
+
+    //overlay settings (defaults), no runtime limit (deterministic)
+    label_placement::Settings settings;
+    settings.roi            = QRectF(0.0, 0.0, 1599.0, 899.0);
+    settings.cs_max_time_ms = 0.0;
+    settings.cs_adaptive    = GENERATE(false, true);
+
+    auto run = [ & ] (bool spatial_index, label_placement::constraint::Stats& stats)
+    {
+        auto ls = labels;
+
+        settings.cs_spatial_index = spatial_index;
+        REQUIRE(label_placement::constraint::placeLabels(ls, settings, &stats));
+
+        return ls;
+    };
+
+    label_placement::constraint::Stats stats_tree, stats_pairs;
+
+    const auto with_tree    = run(true,  stats_tree);
+    const auto without_tree = run(false, stats_pairs);
+
+    //bit-identical
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        REQUIRE(with_tree[ i ].x        == without_tree[ i ].x);
+        REQUIRE(with_tree[ i ].y        == without_tree[ i ].y);
+        REQUIRE(with_tree[ i ].excluded == without_tree[ i ].excluded);
+    }
+
+    REQUIRE(stats_tree.separations == stats_pairs.separations);
+    REQUIRE(stats_tree.overlaps    == stats_pairs.overlaps);
+    REQUIRE(stats_tree.overcrowded == stats_pairs.overcrowded);
+    REQUIRE(stats_tree.overcrowded >  0);
+}
+
 TEST_CASE("Constraint based placement of overcrowded groups", "[labelplacement]")
 {
     //20 labels at the same anchor (pile-up) and a label far away
@@ -846,10 +994,59 @@ TEST_CASE("Constraint based placement of overcrowded groups", "[labelplacement]"
         REQUIRE(density[ 20 ] < 0.5);
     }
 
+    SECTION("group densities: the area of a group is the union of its candidate regions, clipped if given")
+    {
+        //diagonal chain of 10 labels (home boxes overlap with the next one only)
+        const double dx = 50.0, dy = 14.0;
+
+        std::vector<label_placement::Label> chain(10);
+        std::vector<double> hx, hy;
+
+        for (size_t i = 0; i < chain.size(); ++i)
+        {
+            auto& l = chain[ i ];
+
+            l.id       = std::to_string(i);
+            l.w        = 60.0;
+            l.h        = 16.0;
+            l.x_anchor = 100.0 + i * dx;
+            l.y_anchor = 100.0 + i * dy;
+
+            hx.push_back(l.x_anchor + 14.0);
+            hy.push_back(l.y_anchor - 30.0);
+        }
+
+        //candidate regions: anchor +- (anchor distance of the home + label size), the union of the shifted
+        //regions is a staircase
+        const double dist = std::hypot(14.0, 14.0);
+        const double rw   = 2 * (dist + 60.0);
+        const double rh   = 2 * (dist + 16.0);
+        const double n    = (double)chain.size();
+
+        const double union_area = rw * rh + (n - 1) * (rw * rh - (rw - dx) * (rh - dy));
+        const double bbox_area  = (rw + (n - 1) * dx) * (rh + (n - 1) * dy);
+        const double label_area = n * 62.0 * 18.0;
+
+        const auto density = label_placement::constraint::groupDensities(chain, hx, hy, 2.0, 2.0);
+
+        //one group, measured on the raster (cells of 8 px)
+        REQUIRE(density.front() == Approx(label_area / union_area).epsilon(0.03));
+        REQUIRE(density.back()  == Approx(density.front()));
+        REQUIRE(density.front() > 1.8 * label_area / bbox_area);
+
+        //clipped to the upper left part => less area available
+        const QRectF clip(0.0, 0.0, 100.0 + 5 * dx, 1000.0);
+
+        const auto density_clipped = label_placement::constraint::groupDensities(chain, hx, hy, 2.0, 2.0, clip);
+
+        REQUIRE(density_clipped.front() > 1.5 * density.front());
+    }
+
     SECTION("an overcrowded group is not decluttered, the others are")
     {
         label_placement::Settings settings;
-        settings.method               = label_placement::Method::ConstraintBased;
+        minimalConstraintSettings(settings);
+
         settings.cs_max_group_density = 1.0;
 
         label_placement::constraint::Stats stats;
@@ -870,7 +1067,7 @@ TEST_CASE("Constraint based placement of overcrowded groups", "[labelplacement]"
     SECTION("without the threshold the pile-up is decluttered")
     {
         label_placement::Settings settings;
-        settings.method = label_placement::Method::ConstraintBased;
+        minimalConstraintSettings(settings);
 
         label_placement::constraint::Stats stats;
         REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
@@ -878,6 +1075,204 @@ TEST_CASE("Constraint based placement of overcrowded groups", "[labelplacement]"
         REQUIRE(stats.overcrowded == 0);
         REQUIRE(stats.separations > 0);
         REQUIRE(stats.overlaps == 0);
+    }
+}
+
+TEST_CASE("Constraint based placement area table and crowding", "[labelplacement]")
+{
+    SECTION("area table: exact for cell aligned rectangles, continuous in between")
+    {
+        std::mt19937 rng(5);
+        std::uniform_real_distribution<double> ux(-20.0, 780.0), uy(-20.0, 580.0), uw(5.0, 90.0), uh(5.0, 40.0);
+
+        std::vector<QRectF> boxes;
+        for (int i = 0; i < 200; ++i)
+            boxes.emplace_back(ux(rng), uy(rng), uw(rng), uh(rng));
+
+        const QRectF bounds(0.0, 0.0, 800.0, 600.0);
+
+        label_placement::constraint::AreaTable table;
+        table.build(boxes, bounds, 8.0);
+
+        auto bruteForce = [ & ] (const QRectF& r)
+        {
+            double a = 0.0;
+            for (const auto& b : boxes)
+                a += label_placement::constraint::overlapArea(b, r.intersected(bounds));
+            return a;
+        };
+
+        REQUIRE(table.area(bounds) == Approx(bruteForce(bounds)).epsilon(1e-9));
+
+        const QRectF aligned(16.0, 24.0, 400.0, 320.0);
+        REQUIRE(table.area(aligned) == Approx(bruteForce(aligned)).epsilon(1e-9));
+
+        //not aligned: close to the exact area, no jumps when moved by a fraction of a cell
+        const QRectF r(13.7, 21.3, 317.9, 211.4);
+        REQUIRE(table.area(r) == Approx(bruteForce(r)).epsilon(0.02));
+        REQUIRE(table.area(r.translated(0.1, 0.1)) == Approx(table.area(r)).epsilon(0.002));
+    }
+
+    SECTION("crowding: a small dense cluster with room around it is less crowded than a large area of the same density")
+    {
+        //labels 60x16 on a grid of 70x24 px: a 3x3 cluster and a field over the whole region
+        auto grid = [ & ] (int nx, int ny, double x0, double y0)
+        {
+            std::vector<label_placement::Label> labels;
+            for (int iy = 0; iy < ny; ++iy)
+            {
+                for (int ix = 0; ix < nx; ++ix)
+                {
+                    label_placement::Label l;
+                    l.w        = 60.0;
+                    l.h        = 16.0;
+                    l.x_anchor = x0 + ix * 70.0;
+                    l.y_anchor = y0 + iy * 24.0;
+                    labels.push_back(l);
+                }
+            }
+            return labels;
+        };
+
+        auto centerCrowding = [ & ] (const std::vector<label_placement::Label>& labels, size_t center)
+        {
+            std::vector<double> hx, hy;
+            for (const auto& l : labels)
+            {
+                hx.push_back(l.x_anchor + 14.0);
+                hy.push_back(l.y_anchor - 30.0);
+            }
+
+            const auto crowding = label_placement::constraint::localCrowding(labels, hx, hy, 2.0, 2.0, 4, 2.0,
+                                                                             QRectF(0.0, 0.0, 1600.0, 900.0));
+            return crowding[ center ];
+        };
+
+        const auto cluster = grid(3, 3, 800.0, 450.0);
+        const auto field   = grid(22, 37, 30.0, 40.0);
+
+        const double c_cluster = centerCrowding(cluster, 4);
+        const double c_field   = centerCrowding(field, 18 * 22 + 11);
+
+        REQUIRE(c_cluster < 0.5);
+        REQUIRE(c_field   > 0.5);
+        REQUIRE(c_field   > 2.0 * c_cluster);
+    }
+}
+
+TEST_CASE("Constraint based placement adaptive", "[labelplacement]")
+{
+    //core of 30 labels at one anchor, chain of 5 labels leading away from it (home boxes overlapping the next one)
+    std::vector<label_placement::Label> labels(35);
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        auto& l = labels[ i ];
+
+        const double ax = i < 30 ? 400.0 : 455.0 + (i - 30) * 50.0;
+
+        l.id       = std::to_string(i);
+        l.w        = 60.0;
+        l.h        = 16.0;
+        l.x_anchor = ax;
+        l.y_anchor = 400.0;
+        l.x        = l.x_last = ax + 14.0;
+        l.y        = l.y_last = 400.0 - 30.0;
+        l.x_ref    = l.x;
+        l.y_ref    = l.y;
+    }
+
+    label_placement::Settings settings;
+    minimalConstraintSettings(settings);
+
+    settings.cs_max_group_density = 1.0;
+
+    //adaptive parameters fixed (independent of the tuned defaults): the core of 30 labels is crowded
+    settings.cs_max_local_density = 0.5;
+    settings.cs_local_scales      = 4;
+    settings.cs_local_reach       = 2.0;
+
+    SECTION("group density: one group, nothing decluttered")
+    {
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.overcrowded == 35);
+
+        for (const auto& l : labels)
+            REQUIRE(l.excluded);
+    }
+
+    SECTION("adaptive: the core and the chain labels next to it stay at home, the rest is decluttered")
+    {
+        settings.cs_adaptive = true;
+
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.overcrowded == 32);
+        REQUIRE(stats.max_local_density > settings.cs_max_local_density);
+        REQUIRE(stats.max_group_density == 0.0); // replaced
+
+        for (size_t i = 0; i < labels.size(); ++i)
+        {
+            const auto& l = labels[ i ];
+
+            REQUIRE(l.excluded == (i < 32));
+
+            if (l.excluded)
+            {
+                REQUIRE(l.x == Approx(l.x_ref.value()));
+                REQUIRE(l.y == Approx(l.y_ref.value()));
+            }
+        }
+
+        //labels left at home are fixed obstacles: the first decluttered label leaves the home of its neighbour
+        const auto& fixed = labels[ 31 ];
+        const auto& moved = labels[ 32 ];
+
+        REQUIRE(QRectF(fixed.x_ref.value(), fixed.y_ref.value(), fixed.w, fixed.h).intersects(
+                QRectF(moved.x_ref.value(), moved.y_ref.value(), moved.w, moved.h)));
+        REQUIRE(!QRectF(fixed.x, fixed.y, fixed.w, fixed.h).intersects(QRectF(moved.x, moved.y, moved.w, moved.h)));
+
+        REQUIRE(stats.unresolvable == 0);
+    }
+
+    SECTION("adaptive: hysteresis, a label not decluttered before rejoins only below the reduced threshold")
+    {
+        std::vector<double> hx, hy;
+        for (const auto& l : labels)
+        {
+            hx.push_back(l.x_ref.value());
+            hy.push_back(l.y_ref.value());
+        }
+
+        const auto crowding = label_placement::constraint::localCrowding(labels,
+                                                                         hx,
+                                                                         hy,
+                                                                         2.0,
+                                                                         2.0,
+                                                                         settings.cs_local_scales,
+                                                                         settings.cs_local_reach);
+
+        //last chain label between the reduced and the full threshold
+        const double d = crowding.back();
+        REQUIRE(d > 0.0);
+
+        settings.cs_adaptive          = true;
+        settings.cs_max_local_density = d / 0.9;
+        settings.cs_local_hysteresis  = 0.8;
+
+        auto run = [ & ] (bool excluded_last)
+        {
+            auto ls = labels;
+            ls.back().excluded_last = excluded_last;
+
+            REQUIRE(label_placement::constraint::placeLabels(ls, settings));
+            return ls.back().excluded;
+        };
+
+        REQUIRE(!run(false));
+        REQUIRE(run(true));
     }
 }
 
