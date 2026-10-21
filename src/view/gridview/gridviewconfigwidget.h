@@ -62,6 +62,7 @@ public:
 protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() override;
+    virtual void onDisplayChange_impl() override;
 
     virtual void variableChangedEvent(int idx) override;
     virtual void dataSourceChangedEvent() override;

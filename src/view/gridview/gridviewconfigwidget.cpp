@@ -316,6 +316,16 @@ void GridViewConfigWidget::loadingDone()
 }
 
 /**
+ * Notice: the asynchronous recompute commits the grid after loadingDone()/redrawDone()
+ * and only signals the display change.
+*/
+void GridViewConfigWidget::onDisplayChange_impl()
+{
+    updateExport();
+    checkRanges();
+}
+
+/**
 */
 void GridViewConfigWidget::updateExport()
 {
