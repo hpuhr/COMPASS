@@ -48,6 +48,7 @@
 
 #include "dbcontentlayer.h"
 #include "viewlayerpanelwidget.h"
+#include "colormodelabel.h"
 #include "viewlayertreemodel.h"
 #include "annotationsrootitem.h"
 
@@ -213,12 +214,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     // the compass icon. The label tracks the current color mode so the
     // default expansion depth (which follows the color mode) is discoverable.
     {
-        color_mode_label_ = new QLabel(this);
-        color_mode_label_->setText("Color Mode: " + colorModeText(view_->compass().colorMode()));
-        config_layout->addWidget(color_mode_label_);
-
-        connect(&view_->compass(), &COMPASS::colorModeChangedSignal,
-                this, &GridViewConfigWidget::colorModeChangedSlot);
+        config_layout->addWidget(new ColorModeLabel(view_->compass(), this));
 
         LayerColumnSpec null_col;
         null_col.header           = "# Null";
@@ -237,52 +233,13 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
         connect(layer_panel_->model(), &LayerTreeModel::hiddenChangedSignal,
                 data_widget, &GridViewDataWidget::layersChangedSlot);
 
-        // Tree was rebuilt -> re-apply default expansion.
-        connect(data_widget, &GridViewDataWidget::layerTreeRebuiltSignal,
-                this, &GridViewConfigWidget::applyDefaultExpansionSlot);
+        // Data expansion mirrors the other views (follows the COMPASS color mode)
+        layer_panel_->followColorMode(view_->compass());
 
         config_layout->addWidget(layer_panel_);
     }
 
     //showSwitch(0, true);
-}
-
-/**
-*/
-void GridViewConfigWidget::applyDefaultExpansionSlot()
-{
-    if (!db_content_root_ || !layer_panel_)
-        return;
-
-    // Mirror the expansion the other views use - drive depth from the active
-    // COMPASS color mode so the level that differentiates colors in other
-    // views stays visible here too.
-    db_content_root_->applyDefaultExpansionForColorMode(
-        layer_panel_->treeView(), view_->compass().colorMode());
-}
-
-/**
-*/
-void GridViewConfigWidget::colorModeChangedSlot(unsigned int mode)
-{
-    traced_assert(color_mode_label_);
-    color_mode_label_->setText("Color Mode: " + colorModeText(mode));
-
-    applyDefaultExpansionSlot();
-}
-
-/**
-*/
-QString GridViewConfigWidget::colorModeText(unsigned int mode)
-{
-    switch (mode)
-    {
-        case 0: return "DSType";
-        case 1: return "DBContent";
-        case 2: return "Data Source";
-        case 3: return "Data Source + Line";
-        default: return "Unknown";
-    }
 }
 
 /**

@@ -22,16 +22,22 @@
 #include <QAction>
 #include <QMenu>
 #include <QString>
-#include <QTreeView>
 
 #include <functional>
 #include <unordered_map>
 
 // ---- DBContentGroupItem ---------------------------------------------------
 
-DBContentGroupItem::DBContentGroupItem(const std::string& name, DBContentLayerLevel level)
-    : LayerTreeItem(name), level_(level)
+DBContentGroupItem::DBContentGroupItem(const std::string& name,
+                                       DBContentLayerLevel level,
+                                       const std::optional<unsigned int>& ds_id)
+    : LayerTreeItem(name), level_(level), ds_id_(ds_id)
 {
+}
+
+std::string DBContentGroupItem::stateKeyId() const
+{
+    return ds_id_ ? "ds:" + std::to_string(*ds_id_) : std::string();
 }
 
 std::string DBContentGroupItem::persistenceId() const
@@ -127,11 +133,8 @@ DBContentLeafItem::DBContentLeafItem(const std::string& name, DBContentLeafPaylo
 {
     traced_assert(payload_);
     setColor(payload_->color());
-}
 
-std::string DBContentLeafItem::persistenceId() const
-{
-    return payload_ ? payload_->persistenceId() : std::string{};
+    persistence_id_ = payload_->persistenceId();
 }
 
 QVariant DBContentLeafItem::itemData(int column) const
@@ -170,17 +173,20 @@ DBContentRootItem::DBContentRootItem()
 
 namespace
 {
+    /// matches by ds_id if given (same-named data sources stay apart), else by name
     DBContentGroupItem* findOrCreateGroup(LayerTreeItem* parent,
                                           const std::string& name,
-                                          DBContentLayerLevel level)
+                                          DBContentLayerLevel level,
+                                          const std::optional<unsigned int>& ds_id = std::nullopt)
     {
         for (int i = 0; i < parent->childCount(); ++i)
         {
-            auto* c = parent->child(i);
-            if (c->name() == name)
-                return static_cast<DBContentGroupItem*>(c);
+            auto* c = static_cast<DBContentGroupItem*>(parent->child(i));
+
+            if (ds_id ? c->dsID() == ds_id : !c->dsID() && c->name() == name)
+                return c;
         }
-        auto group = std::make_unique<DBContentGroupItem>(name, level);
+        auto group = std::make_unique<DBContentGroupItem>(name, level, ds_id);
         auto* raw  = group.get();
         parent->appendChild(std::move(group));
         return raw;
@@ -203,7 +209,7 @@ std::vector<std::unique_ptr<LayerTreeItem>> DBContentRootItem::buildChildrenFrom
             continue;
 
         auto* ds_type_group = findOrCreateGroup(scratch.get(),    e.ds_type,   DBContentLayerLevel::DSType);
-        auto* ds_group      = findOrCreateGroup(ds_type_group,    e.ds_name,   DBContentLayerLevel::DataSource);
+        auto* ds_group      = findOrCreateGroup(ds_type_group,    e.ds_name,   DBContentLayerLevel::DataSource, e.ds_id);
         auto* line_group    = findOrCreateGroup(ds_group,         e.line,      DBContentLayerLevel::Line);
 
         auto leaf = std::make_unique<DBContentLeafItem>(e.dbcontent, e.payload);
@@ -224,49 +230,4 @@ void DBContentRootItem::recomputeColorsRecursive()
             g->recomputeColorFromDirectChildren();
     };
     walk(this);
-}
-
-void DBContentRootItem::applyDefaultExpansionForColorMode(QTreeView* tree_view,
-                                                          unsigned int mode) const
-{
-    if (!tree_view || !model())
-        return;
-
-    // build the QModelIndex for this root
-    const QModelIndex root_idx = model()->index(row(), 0, QModelIndex());
-
-    // COMPASS::colorMode() order:
-    //   0 DSType, 1 DBContent, 2 DataSource, 3 DataSourceLine
-    // Expansion target (relative to this root row):
-    //   DSType         -> collapsed (no descendants expanded)
-    //   DataSource     -> expand one level (show DSType -> DS rows)
-    //   DataSourceLine -> expand two levels (show up to Line rows)
-    //   DBContent      -> expand three levels (everything)
-    int depth = 0;
-    switch (mode)
-    {
-        case 0: depth = 0; break;   // DSType
-        case 2: depth = 1; break;   // DataSource
-        case 3: depth = 2; break;   // DataSourceLine
-        case 1: depth = 3; break;   // DBContent
-        default: depth = 3; break;
-    }
-
-    // The DBContent root itself is always shown; expand it so its children
-    // are visible, then descend to `depth`.
-    tree_view->expand(root_idx);
-
-    std::function<void(const QModelIndex&, int)> walk =
-        [&](const QModelIndex& idx, int remaining)
-    {
-        if (remaining <= 0) return;
-        const int n = model()->rowCount(idx);
-        for (int i = 0; i < n; ++i)
-        {
-            QModelIndex child_idx = model()->index(i, 0, idx);
-            tree_view->expand(child_idx);
-            walk(child_idx, remaining - 1);
-        }
-    };
-    walk(root_idx, depth);
 }
