@@ -37,7 +37,6 @@
 #include <QFormLayout>
 #include <QFileDialog>
 #include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QMenu>
 
 using namespace std;
@@ -881,7 +880,10 @@ void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
         }
     }
 
-    loginf << "'" << value << "'";
+    loginf << "'" << value << "' ok " << ok;
+
+    if (!ok)
+        return;
 
 traced_assert(current_ds_);
     currentDataSource().longitude(value);
@@ -1096,27 +1098,28 @@ bool DataSourceEditWidget::editRemoteUnit(int idx)
     auto comment_box = new QLineEdit;
     comment_box->setText(add ? "" : QString::fromStdString(ru_def_in.comment));
 
-    auto lat_box = new QDoubleSpinBox;
-    lat_box->setMinimum(-90);
-    lat_box->setMaximum( 90);
-    lat_box->setValue(add ? 0 : ru_def_in.latitude);
+    // position input as in the FFT edit widget, a remote unit always needs a position => no empty values
+    auto lat_box = new QLineEdit;
+    lat_box->setValidator(new TextFieldDoubleValidator(-90, 90, 8, lat_box));
+    lat_box->setPlaceholderText("not set");
+    lat_box->setText(add ? "" : QString::number(ru_def_in.latitude, 'g', 12));
 
-    auto lon_box = new QDoubleSpinBox;
-    lon_box->setMinimum(-180);
-    lon_box->setMaximum( 180);
-    lon_box->setValue(add ? 0 : ru_def_in.longitude);
+    auto lon_box = new QLineEdit;
+    lon_box->setValidator(new TextFieldDoubleValidator(-180, 180, 8, lon_box));
+    lon_box->setPlaceholderText("not set");
+    lon_box->setText(add ? "" : QString::number(ru_def_in.longitude, 'g', 12));
 
-    auto alt_box = new QDoubleSpinBox;
-    alt_box->setMinimum(std::numeric_limits<double>::lowest());
-    alt_box->setMaximum(std::numeric_limits<double>::max());
-    alt_box->setValue(add ? 0 : ru_def_in.altitude);
+    auto alt_box = new QLineEdit;
+    alt_box->setValidator(new TextFieldDoubleValidator(-10000, 100000, 1, alt_box));
+    alt_box->setPlaceholderText("not set");
+    alt_box->setText(add ? "" : QString::number(ru_def_in.altitude, 'f', 1));
 
-    data_layout->addRow("Index: "    , index_box);
-    data_layout->addRow("Name: "     , name_box);
-    data_layout->addRow("Comment: "  , comment_box);
-    data_layout->addRow("Latitude: " , lat_box);
-    data_layout->addRow("Longitude: ", lon_box);
-    data_layout->addRow("Altitude: " , alt_box);
+    data_layout->addRow("Index: "        , index_box);
+    data_layout->addRow("Name: "         , name_box);
+    data_layout->addRow("Comment: "      , comment_box);
+    data_layout->addRow("Latitude: "     , lat_box);
+    data_layout->addRow("Longitude: "    , lon_box);
+    data_layout->addRow("Altitude [m]: " , alt_box);
 
     auto ok_button = new QPushButton(add ? "Add" : "Apply");
     auto cancel_button = new QPushButton("Cancel");
@@ -1139,6 +1142,12 @@ bool DataSourceEditWidget::editRemoteUnit(int idx)
         {
             err = "Please choose a non-empty name.";
         }
+        else if (!lat_box->hasAcceptableInput() ||
+                 !lon_box->hasAcceptableInput() ||
+                 !alt_box->hasAcceptableInput())
+        {
+            err = "Please enter a valid latitude, longitude and altitude.";
+        }
 
         if (!err.isEmpty())
         {
@@ -1158,9 +1167,9 @@ bool DataSourceEditWidget::editRemoteUnit(int idx)
     ru_def.index     = index_box->value();
     ru_def.name      = name_box->text().toStdString();
     ru_def.comment   = comment_box->text().toStdString();
-    ru_def.latitude  = lat_box->value();
-    ru_def.longitude = lon_box->value();
-    ru_def.altitude  = alt_box->value();
+    ru_def.latitude  = lat_box->text().toDouble();
+    ru_def.longitude = lon_box->text().toDouble();
+    ru_def.altitude  = alt_box->text().toDouble();
 
     {
         auto key = std::to_string(ru_def.index);
