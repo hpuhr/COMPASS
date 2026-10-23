@@ -22,10 +22,12 @@
 
 #include "json.hpp"
 
+#include <QAction>
 #include <QBrush>
 #include <QPainter>
 #include <QPen>
 #include <QPixmap>
+#include <QPointer>
 
 namespace
 {
@@ -161,6 +163,25 @@ void LayerTreeItem::rename(const std::string& name)
     model_->state().renameItemStates(old_key, stateKey());
 
     notifyChanged();
+}
+
+void LayerTreeItem::connectItemAction(QAction* action, const std::function<void(LayerTreeItem&)>& func) const
+{
+    traced_assert(action);
+    traced_assert(model_);
+
+    // resolved when triggered: the item may have been rebuilt (same key => its successor) or removed
+    QPointer<LayerTreeModel> model = model_;
+    const std::string        key   = stateKey();
+
+    QObject::connect(action, &QAction::triggered, [ model, key, func ] ()
+    {
+        if (!model)
+            return;
+
+        if (LayerTreeItem* item = model->findItem(key))
+            func(*item);
+    });
 }
 
 void LayerTreeItem::setModel(LayerTreeModel* model)

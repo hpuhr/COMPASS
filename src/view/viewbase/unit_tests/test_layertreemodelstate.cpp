@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include <QAction>
 #include <QSignalSpy>
 
 namespace
@@ -374,6 +375,55 @@ TEST_CASE("LayerTreeItem keeps the remembered states of a renamed item", "[view]
         id_item->rename("other");
 
         REQUIRE(f.model.state().itemState("Data/id"));
+    }
+}
+
+TEST_CASE("LayerTreeModel finds items by state key", "[view][layerpanel]")
+{
+    Fixture f;
+
+    auto* c = f.item(0)->appendChildNotified(std::make_unique<LayerTreeItem>("c"));
+    f.model.addRootItem(std::make_unique<LayerTreeItem>("Database")); // "Data" as name prefix
+
+    REQUIRE(f.model.findItem("Data") == f.data);
+    REQUIRE(f.model.findItem("Data/d1/c") == c);
+    REQUIRE(f.model.findItem("Data/d3") == nullptr);
+    REQUIRE(f.model.findItem("") == nullptr);
+}
+
+TEST_CASE("LayerTreeItem resolves menu actions by key when triggered", "[view][layerpanel]")
+{
+    auto model = std::make_unique<LayerTreeModel>();
+    auto* data = model->addRootItem(std::make_unique<LayerTreeItem>("Data"));
+    model->refreshSubtree(data, [] () { return buildItems(DefaultSpecs); }, false);
+
+    std::vector<std::string> triggered;
+
+    QAction action(nullptr);
+    data->child(0)->connectItemAction(&action, [ & ] (LayerTreeItem& item) { triggered.push_back(item.stateKey()); });
+
+    SECTION("a rebuilt item => its successor")
+    {
+        model->refreshSubtree(data, [] () { return buildItems(DefaultSpecs); }, false);
+        action.trigger();
+
+        REQUIRE(triggered == std::vector<std::string>{ "Data/d1" });
+    }
+
+    SECTION("a removed item => nothing")
+    {
+        data->removeChildNotified(0);
+        action.trigger();
+
+        REQUIRE(triggered.empty());
+    }
+
+    SECTION("a destroyed model => nothing")
+    {
+        model.reset();
+        action.trigger();
+
+        REQUIRE(triggered.empty());
     }
 }
 

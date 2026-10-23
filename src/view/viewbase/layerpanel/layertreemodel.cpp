@@ -425,6 +425,40 @@ void LayerTreeModel::clearItemStates(const LayerTreeItem* subtree, int flags)
 }
 
 /**
+ * Descends only into items whose key is a prefix of the searched key.
+ */
+LayerTreeItem* LayerTreeModel::findItem(const std::string& key) const
+{
+    if (key.empty())
+        return nullptr;
+
+    std::function<LayerTreeItem*(LayerTreeItem*)> search = [&](LayerTreeItem* parent) -> LayerTreeItem*
+    {
+        for (int i = 0; i < parent->childCount(); ++i)
+        {
+            LayerTreeItem*    child     = parent->child(i);
+            const std::string child_key = child->stateKey();
+
+            if (child_key == key)
+                return child;
+
+            const bool below = key.size() > child_key.size() &&
+                               key.compare(0, child_key.size(), child_key) == 0 &&
+                               key[ child_key.size() ] == '/';
+            if (!below)
+                continue;
+
+            if (LayerTreeItem* hit = search(child))
+                return hit;
+        }
+
+        return nullptr;
+    };
+
+    return search(root_item_.get());
+}
+
+/**
  */
 bool LayerTreeModel::doPruneItem(const std::string& key,
                                  const LayerTreeState::ItemState& /*state*/,

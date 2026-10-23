@@ -161,6 +161,9 @@ public:
     /// drops the given components (combination of LayerTreeState::PersistFlag) of the subtree's item states
     void clearItemStates(const LayerTreeItem* subtree, int flags);
 
+    /// the item with the given state key, nullptr if there is none
+    LayerTreeItem* findItem(const std::string& key) const;
+
     /// binds the view's item config (see LayerTreeState::bindConfig()) and applies it to the current items
     void bindConfig(nlohmann::json* root);
     /// re-applies the config to all items, e.g. after a preset was applied

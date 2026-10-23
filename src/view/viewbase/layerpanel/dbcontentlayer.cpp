@@ -82,12 +82,13 @@ void DBContentGroupItem::buildContextMenu(QMenu& menu)
 {
     const QString nm = QString::fromStdString(name());
 
+    // resolved by key when triggered, the group may be rebuilt while the menu is open
     auto add = [&menu, this](const QString& text, const QString& tip,
-                             std::function<void()> fn)
+                             std::function<void(LayerTreeItem&)> fn)
     {
         QAction* a = menu.addAction(text);
         a->setToolTip(tip);
-        QObject::connect(a, &QAction::triggered, [fn]{ fn(); });
+        connectItemAction(a, fn);
     };
 
     switch (level_)
@@ -110,19 +111,19 @@ void DBContentGroupItem::buildContextMenu(QMenu& menu)
 
     add("Show All Children",
         "Show every direct child of this entry (this entry and grandchildren untouched)",
-        [this]{
-            for (int i = 0; i < childCount(); ++i)
-                child(i)->setHidden(false, /*emit_signal=*/false);
-            if (model())
-                emit model()->hiddenChangedSignal();
+        [](LayerTreeItem& group){
+            for (int i = 0; i < group.childCount(); ++i)
+                group.child(i)->setHidden(false, /*emit_signal=*/false);
+            if (group.model())
+                emit group.model()->hiddenChangedSignal();
         });
     add("Hide All Children",
         "Hide every direct child of this entry (this entry and grandchildren untouched)",
-        [this]{
-            for (int i = 0; i < childCount(); ++i)
-                child(i)->setHidden(true, /*emit_signal=*/false);
-            if (model())
-                emit model()->hiddenChangedSignal();
+        [](LayerTreeItem& group){
+            for (int i = 0; i < group.childCount(); ++i)
+                group.child(i)->setHidden(true, /*emit_signal=*/false);
+            if (group.model())
+                emit group.model()->hiddenChangedSignal();
         });
 }
 

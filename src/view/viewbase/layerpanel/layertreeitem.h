@@ -30,6 +30,7 @@
 #include <vector>
 
 class LayerTreeModel;
+class QAction;
 class QMenu;
 
 /**
@@ -164,6 +165,10 @@ public:
 
     /// Append this item's own actions to `menu`. Default: no-op.
     virtual void buildContextMenu(QMenu& menu) { (void)menu; }
+
+    /// runs func on the item with this item's key when the action is triggered, nothing if there is none
+    /// Notice: menus may stay open across rebuilds (QMenu::exec()) => never capture the item itself
+    void connectItemAction(QAction* action, const std::function<void(LayerTreeItem&)>& func) const;
 
     // ---- hooks -------------------------------------------------------------
 

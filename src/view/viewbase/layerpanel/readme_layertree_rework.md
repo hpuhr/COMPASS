@@ -48,6 +48,7 @@ architecture notes and decisions.
 - [x] Step 4: subtree-scoped pruning, the same in all views
 - [x] Step 2: stable, escaped keys (`stateKeyId()`), data source groups by id (geographic view)
 - [x] Step 3: renamed items keep their remembered states (`rename()`, sector layer rename signal)
+- [x] Step 1: context menu actions safe across rebuilds (`connectItemAction()`, context objects)
 
 Tests: `src/view/viewbase/unit_tests/test_layerpanelviewstate.cpp`, `test_layertreemodelstate.cpp`,
 `test_layertreeitemconfig.cpp`.
@@ -146,9 +147,32 @@ Tests: `src/view/viewbase/unit_tests/test_layerpanelviewstate.cpp`, `test_layert
 Each step: build, full unit test suite, check in the application (geographic view in live mode,
 reload, database close/open, application restart, preset apply where relevant).
 
-### Step 1 - Context menu use-after-free on reload
+### Step 1 - Context menu use-after-free on reload (done)
 
-Menus run a nested event loop (`QMenu::exec()`), a rebuild during it (live tick, load completion,
+Done:
+
+- `LayerTreeModel::findItem(key)`: item by state key, descends only into key prefixes
+- `LayerTreeItem::connectItemAction(action, func)`: captures the model (`QPointer`) and the key,
+  resolves the item when triggered => its successor after a rebuild (same key), nothing after a
+  removal or with a destroyed model; for items that are no QObject
+- `DBContentGroupItem::buildContextMenu()` (all views): Show / Hide All Children via
+  `connectItemAction()`
+- `GeometryItemProvider::addNodeActions()`: Show / Hide via `connectItemAction()` on the clicked
+  item or the one resolved from the filter (target report menu)
+- `OSGAnnotationsTreeItemInternal::buildContextMenu()` (zoom, export, opacity) and
+  `OSGAnnotationsRootTreeItemViewPoint` (show / hide): `this` as context object
+- internal annotations, item busy when destroyed: `renameItem()` guards itself with a `QPointer`
+  across its modal dialog (own event loop); "Remove" (`deleteItemSignal`) reaches
+  `removeAnnotation()` queued and guarded, so the item is not destroyed inside its own signal
+  emission (as the measurements already did)
+- already safe: the panel's "All" section (panel as context), the provider's item / target report
+  actions (resolved by id / reference), all other OSG item menus (`this` as context), annotation
+  leaves (the radio activation rebuilds the Data subtree, not the annotation subtree)
+- open menus are not closed on a rebuild: entries of vanished items stay visible, triggering them
+  does nothing
+- tests: `findItem()` incl. a name prefix sibling, action after rebuild / removal / model destroyed
+
+Original plan: menus run a nested event loop (`QMenu::exec()`), a rebuild during it (live tick, load completion,
 runtime command) destroys the items the actions captured.
 
 - `GeometryItemProvider::addNodeActions()`: Show/Hide capture the raw item (also when resolved from
@@ -446,7 +470,8 @@ snapshot before the rows vanish, restore on insert. Works, but:
 - identity via string keys (names, paths, ids, escaping, `#n`) - producers changing their naming
   silently break the restore
 - per-row view state is not restored: scroll position (to check, may jump per live tick), hover,
-  keyboard focus, tooltips, open context menus (step 1)
+  keyboard focus, tooltips; open context menus show entries of vanished items (safe since step 1,
+  but they do nothing)
 - the whole Data subtree is rebuilt and captured / restored per live tick
 
 Dropping destroy and rebuild in favor of in-place reconciliation (step 8: keep the items, swap
