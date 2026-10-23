@@ -663,10 +663,9 @@ void GridViewConfigWidget::exportToGeographicView()
 
     ViewPointGenAnnotation anno(export_config->item_name);
 
-    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, 
-                                                          geo_image->second, 
-                                                          legend, 
-                                                          true);
+    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first,
+                                                          geo_image->second,
+                                                          legend);
     anno.addFeature(geo_image_feat);
 
     nlohmann::json j;
